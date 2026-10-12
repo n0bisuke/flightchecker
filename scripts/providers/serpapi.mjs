@@ -2,18 +2,21 @@
 // https://serpapi.com/google-flights-api
 // 必要な環境変数: SERPAPI_KEY
 
+import { codes } from '../lib/util.mjs';
+
 export const name = 'serpapi';
 
 export function isEnabled(env) {
   return Boolean(env.SERPAPI_KEY);
 }
 
-export async function fetchQuotes(route, { env, currency, fetchImpl = fetch }) {
+export async function fetchQuotes(route, { departDate, env, currency, fetchImpl = fetch }) {
   const params = new URLSearchParams({
     engine: 'google_flights',
-    departure_id: route.origin,
-    arrival_id: route.destination,
-    outbound_date: route.departDate,
+    // 複数空港はカンマ区切りで指定できる（例: HND,NRT）
+    departure_id: codes(route.origin).join(','),
+    arrival_id: codes(route.destination).join(','),
+    outbound_date: departDate,
     type: route.returnDate ? '1' : '2',
     adults: String(route.adults ?? 1),
     currency,

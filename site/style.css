@@ -59,13 +59,35 @@ main { display: grid; gap: 16px; padding-top: 16px; padding-bottom: 16px; }
 .reason { margin: 8px 0; }
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
   gap: 8px;
   margin: 0 0 12px;
 }
 .stats div { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
 .stats dt { color: var(--muted); font-size: 0.75rem; }
 .stats dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.by-date {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+}
+.by-date li {
+  display: flex;
+  flex-direction: column;
+  min-width: 96px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.by-date .d { color: var(--muted); font-size: 0.75rem; }
+.by-date .p { font-weight: 700; }
+.by-date li.best { border-color: var(--buy); }
+.by-date li.best .p { color: var(--buy); }
+.by-date li.past { opacity: 0.5; }
 .chart-wrap { position: relative; height: 280px; }
 details { margin-top: 12px; }
 summary { cursor: pointer; color: var(--muted); }

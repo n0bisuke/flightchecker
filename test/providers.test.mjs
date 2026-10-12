@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import * as serpapi from '../scripts/providers/serpapi.mjs';
 import { parseSerpApiResponse } from '../scripts/providers/serpapi.mjs';
+import * as duffel from '../scripts/providers/duffel.mjs';
 import { parseDuffelResponse } from '../scripts/providers/duffel.mjs';
 import { parseResultTexts, buildSearchUrl } from '../scripts/providers/google-flights-scrape.mjs';
 import { selectProviders } from '../scripts/providers/index.mjs';
@@ -51,9 +53,24 @@ test('Google Flights の結果テキストから運賃を抽出する', () => {
   assert.equal(quotes[1].airline, 'ANA, Peach');
 });
 
-test('検索 URL に往復/片道が反映される', () => {
-  assert.match(buildSearchUrl({ origin: 'HND', destination: 'OKA', departDate: '2026-12-20' }, 'JPY'), /one\+way/);
-  assert.match(buildSearchUrl({ origin: 'NRT', destination: 'TPE', departDate: '2027-02-05', returnDate: '2027-02-09' }, 'JPY'), /through\+2027-02-09/);
+test('検索 URL は片道・往復と都市名に対応する', () => {
+  const tokyo = { origin: ['HND', 'NRT'], originName: 'Tokyo', destination: 'CTS' };
+  assert.match(buildSearchUrl(tokyo, '2026-11-01', 'JPY'), /from\+Tokyo\+to\+CTS\+on\+2026-11-01\+one\+way/);
+  assert.match(buildSearchUrl({ origin: 'NRT', destination: 'TPE', returnDate: '2027-02-09' }, '2027-02-05', 'JPY'), /through\+2027-02-09/);
+});
+
+test('SerpApi / Duffel は複数空港を扱える', async () => {
+  const urls = [];
+  const fetchImpl = async (url, opts) => {
+    urls.push([url, opts?.body]);
+    return { ok: true, json: async () => ({ best_flights: [], data: { offers: [] } }) };
+  };
+  const route = { origin: ['HND', 'NRT'], destination: ['ITM', 'KIX'] };
+  await serpapi.fetchQuotes(route, { departDate: '2026-11-18', env: { SERPAPI_KEY: 'k' }, currency: 'JPY', fetchImpl });
+  assert.match(urls[0][0], /departure_id=HND%2CNRT&arrival_id=ITM%2CKIX&outbound_date=2026-11-18/);
+  urls.length = 0;
+  await duffel.fetchQuotes(route, { departDate: '2026-11-18', env: { DUFFEL_TOKEN: 't' }, currency: 'JPY', fetchImpl });
+  assert.equal(urls.length, 4);
 });
 
 test('selectProviders は環境変数に応じて選択する', () => {

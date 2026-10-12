@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cheapestSeries, percentileRank, quantile, slopePerDay, recommend, analyzeRoute } from '../scripts/lib/analysis.mjs';
-import { daysUntil } from '../scripts/lib/util.mjs';
+import { daysUntil, routeDates } from '../scripts/lib/util.mjs';
 
 test('cheapestSeries は同一時刻の中で最安のプロバイダを採用する', () => {
   const s = cheapestSeries([
@@ -39,14 +39,31 @@ test('recommend: 出発直前は BUY、下落傾向なら WAIT、相場上限超
   assert.equal(recommend({ days: -1, latest }).action, 'ENDED');
 });
 
-test('analyzeRoute は SerpApi の相場レンジを優先する', () => {
-  const route = { id: 'r', origin: 'HND', destination: 'OKA', departDate: '2026-12-20' };
+test('analyzeRoute は候補日の中の最安日を採用し、その日の SerpApi 相場レンジを優先する', () => {
+  const route = { id: 'r', origin: ['HND', 'NRT'], destination: 'OKA', departDateFrom: '2026-12-20', departDateTo: '2026-12-22' };
+  const ts = '2026-10-12T00:00:00Z';
   const store = {
-    records: [{ ts: '2026-10-12T00:00:00Z', provider: 'serpapi', minPrice: 14000 }],
-    insights: { serpapi: { typicalRange: [15000, 22000], priceLevel: 'low' } },
+    records: [
+      { ts, departDate: '2026-12-20', provider: 'serpapi', minPrice: 16000 },
+      { ts, departDate: '2026-12-21', provider: 'serpapi', minPrice: 14000 },
+      { ts, departDate: '2026-12-21', provider: 'google-scrape', minPrice: 14500 },
+    ],
+    insights: { serpapi: { '2026-12-21': { typicalRange: [15000, 22000], priceLevel: 'low' } } },
   };
   const r = analyzeRoute(route, store, new Date('2026-10-12T01:00:00Z'));
+  assert.equal(r.latest.departDate, '2026-12-21');
   assert.deepEqual(r.typicalRange, [15000, 22000]);
   assert.equal(r.recommendation.action, 'BUY');
-  assert.equal(r.priceLevel, 'low');
+  assert.deepEqual(r.byDate.map((d) => [d.date, d.price]), [['2026-12-20', 16000], ['2026-12-21', 14000], ['2026-12-22', null]]);
+});
+
+test('analyzeRoute は全候補日が過ぎたら ENDED', () => {
+  const route = { id: 'r', origin: 'OKA', destination: 'HND', departDateFrom: '2026-10-15', departDateTo: '2026-10-18' };
+  const r = analyzeRoute(route, { records: [{ ts: '2026-10-14T00:00:00Z', departDate: '2026-10-15', provider: 'mock', minPrice: 9000 }] }, new Date('2026-10-19T00:00:00Z'));
+  assert.equal(r.recommendation.action, 'ENDED');
+});
+
+test('routeDates は範囲を展開し、単一日付にも対応する', () => {
+  assert.deepEqual(routeDates({ departDateFrom: '2026-10-30', departDateTo: '2026-11-02' }), ['2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02']);
+  assert.deepEqual(routeDates({ departDate: '2026-12-06' }), ['2026-12-06']);
 });

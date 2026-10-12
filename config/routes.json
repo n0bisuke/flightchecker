@@ -2,20 +2,58 @@
   "currency": "JPY",
   "routes": [
     {
-      "id": "HND-OKA-20261220",
-      "label": "羽田 → 那覇（12/20 片道）",
-      "origin": "HND",
-      "destination": "OKA",
-      "departDate": "2026-12-20",
+      "id": "OKA-TYO-1015-1018",
+      "label": "那覇 → 東京（10/15〜10/18）",
+      "origin": ["OKA"],
+      "originName": "Naha",
+      "destination": ["HND", "NRT"],
+      "destinationName": "Tokyo",
+      "departDateFrom": "2026-10-15",
+      "departDateTo": "2026-10-18",
       "adults": 1
     },
     {
-      "id": "NRT-TPE-20270205-20270209",
-      "label": "成田 ⇄ 台北（2/5〜2/9 往復）",
-      "origin": "NRT",
-      "destination": "TPE",
-      "departDate": "2027-02-05",
-      "returnDate": "2027-02-09",
+      "id": "TYO-CTS-1101-1105",
+      "label": "東京 → 新千歳（11/1〜11/5）",
+      "origin": ["HND", "NRT"],
+      "originName": "Tokyo",
+      "destination": ["CTS"],
+      "destinationName": "New Chitose",
+      "departDateFrom": "2026-11-01",
+      "departDateTo": "2026-11-05",
+      "adults": 1
+    },
+    {
+      "id": "TYO-OSA-1118-1120",
+      "label": "東京 → 大阪（11/18〜11/20）",
+      "origin": ["HND", "NRT"],
+      "originName": "Tokyo",
+      "destination": ["ITM", "KIX"],
+      "destinationName": "Osaka",
+      "departDateFrom": "2026-11-18",
+      "departDateTo": "2026-11-20",
+      "adults": 1
+    },
+    {
+      "id": "TYO-FUK-1206",
+      "label": "東京 → 福岡（12/6）",
+      "origin": ["HND", "NRT"],
+      "originName": "Tokyo",
+      "destination": ["FUK"],
+      "destinationName": "Fukuoka",
+      "departDateFrom": "2026-12-06",
+      "departDateTo": "2026-12-06",
+      "adults": 1
+    },
+    {
+      "id": "TYO-HKG-1208-1211",
+      "label": "東京 → 香港（12/8〜12/11）",
+      "origin": ["HND", "NRT"],
+      "originName": "Tokyo",
+      "destination": ["HKG"],
+      "destinationName": "Hong Kong",
+      "departDateFrom": "2026-12-08",
+      "departDateTo": "2026-12-11",
       "adults": 1
     }
   ]

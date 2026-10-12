@@ -3,7 +3,7 @@
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { rm } from 'node:fs/promises';
-import { readJson, writeJson } from './lib/util.mjs';
+import { readJson, writeJson, routeDates } from './lib/util.mjs';
 import { mockQuotes } from './providers/mock.mjs';
 import { runAnalysis } from './analyze.mjs';
 
@@ -18,8 +18,10 @@ for (const route of config.routes) {
   const records = [];
   for (let h = 45 * 24; h >= 0; h -= 6) {
     const at = new Date(now.getTime() - h * 3_600_000);
-    const quotes = mockQuotes(route, currency, at).sort((a, b) => a.price - b.price);
-    records.push({ ts: at.toISOString(), provider: 'mock', currency, minPrice: quotes[0].price, quoteCount: quotes.length, quotes });
+    for (const departDate of routeDates(route)) {
+      const quotes = mockQuotes(route, departDate, currency, at).sort((a, b) => a.price - b.price);
+      records.push({ ts: at.toISOString(), departDate, provider: 'mock', currency, minPrice: quotes[0].price, quoteCount: quotes.length, quotes });
+    }
   }
   await writeJson(join(dataDir, 'prices', `${route.id}.json`), { routeId: route.id, records, insights: {} });
 }

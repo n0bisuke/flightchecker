@@ -1,16 +1,18 @@
 // 価格履歴から統計値と「買い時」の目安を計算する。
 // 機械学習ではなくシンプルな経験則によるヒューリスティック。
 
-import { daysUntil } from './util.mjs';
+import { daysUntil, routeDates } from './util.mjs';
 
 const DAY = 86_400_000;
 
-/** 1回の収集（同一 ts）ごとに、全プロバイダ中の最安値をとった系列を作る。 */
+/** 1回の収集（同一 ts）ごとに、全出発候補日・全プロバイダ中の最安値をとった系列を作る。 */
 export function cheapestSeries(records) {
   const byTs = new Map();
   for (const r of records) {
     const cur = byTs.get(r.ts);
-    if (!cur || r.minPrice < cur.price) byTs.set(r.ts, { ts: r.ts, price: r.minPrice, provider: r.provider });
+    if (!cur || r.minPrice < cur.price) {
+      byTs.set(r.ts, { ts: r.ts, price: r.minPrice, provider: r.provider, departDate: r.departDate ?? null });
+    }
   }
   return [...byTs.values()].sort((a, b) => a.ts.localeCompare(b.ts));
 }
@@ -52,13 +54,17 @@ export function analyzeRoute(route, store, now = new Date()) {
   const series = cheapestSeries(records);
   const prices = series.map((p) => p.price);
   const latest = series.at(-1) ?? null;
-  const days = daysUntil(route.departDate, now);
+  const dates = routeDates(route);
+  const remaining = dates.filter((d) => daysUntil(d, now) >= 0);
+  // 判定に使う出発日: 直近の最安日（出発済みなら残っている最初の候補日）
+  const targetDate = latest?.departDate && remaining.includes(latest.departDate) ? latest.departDate : remaining[0];
+  const days = targetDate ? daysUntil(targetDate, now) : -1;
 
   const recent = series.filter((p) => now.getTime() - Date.parse(p.ts) <= 7 * DAY);
   const slope = slopePerDay(recent);
 
   // 相場レンジ: Google の典型価格帯があれば優先し、なければ自前の履歴の四分位
-  const google = store?.insights?.serpapi;
+  const google = targetDate ? store?.insights?.serpapi?.[targetDate] : null;
   const typicalRange =
     google?.typicalRange ?? (prices.length >= 5 ? [quantile(prices, 0.25), quantile(prices, 0.75)] : null);
 
@@ -70,9 +76,11 @@ export function analyzeRoute(route, store, now = new Date()) {
     label: route.label ?? route.id,
     origin: route.origin,
     destination: route.destination,
-    departDate: route.departDate,
+    departDateFrom: dates[0],
+    departDateTo: dates.at(-1),
     returnDate: route.returnDate ?? null,
     daysToDeparture: days,
+    byDate: latestByDate(records, dates, now),
     latest,
     allTimeLow,
     allTimeHigh: prices.length ? Math.max(...prices) : null,
@@ -83,6 +91,22 @@ export function analyzeRoute(route, store, now = new Date()) {
     priceLevel: google?.priceLevel ?? null,
     recommendation: recommend({ days, latest, pct, slope, typicalRange }),
   };
+}
+
+/** 出発候補日ごとに、最後に取得できた最安値をまとめる。 */
+export function latestByDate(records, dates, now = new Date()) {
+  return dates.map((date) => {
+    const rs = records.filter((r) => r.departDate === date);
+    const lastTs = rs.reduce((max, r) => (r.ts > max ? r.ts : max), '');
+    const best = rs.filter((r) => r.ts === lastTs).sort((a, b) => a.minPrice - b.minPrice)[0];
+    return {
+      date,
+      daysToDeparture: daysUntil(date, now),
+      price: best?.minPrice ?? null,
+      provider: best?.provider ?? null,
+      ts: best?.ts ?? null,
+    };
+  });
 }
 
 export function recommend({ days, latest, pct, slope, typicalRange }) {

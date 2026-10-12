@@ -27,3 +27,19 @@ export function toInt(value) {
   const n = Number(String(value).replace(/[^\d.]/g, ''));
   return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
 }
+
+/** 空港コードを配列で返す（"HND" / ["HND","NRT"] どちらの書き方も可）。 */
+export function codes(value) {
+  return Array.isArray(value) ? value : [value];
+}
+
+/** 路線の出発候補日一覧。departDateFrom〜departDateTo の範囲、または単一の departDate。 */
+export function routeDates(route) {
+  const from = route.departDateFrom ?? route.departDate;
+  const to = route.departDateTo ?? from;
+  const dates = [];
+  for (let t = Date.parse(`${from}T00:00:00Z`); t <= Date.parse(`${to}T00:00:00Z`); t += 86_400_000) {
+    dates.push(new Date(t).toISOString().slice(0, 10));
+  }
+  return dates;
+}

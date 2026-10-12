@@ -6,14 +6,14 @@ export function isEnabled() {
   return false;
 }
 
-export async function fetchQuotes(route, { currency, now = new Date() }) {
-  return { quotes: mockQuotes(route, currency, now), insights: null };
+export async function fetchQuotes(route, { departDate, currency, now = new Date() }) {
+  return { quotes: mockQuotes(route, departDate, currency, now), insights: null };
 }
 
-export function mockQuotes(route, currency, now) {
-  const days = Math.max(0, (Date.parse(route.departDate) - now.getTime()) / 86_400_000);
-  const seed = hash(`${route.id}:${now.toISOString().slice(0, 13)}`);
-  const base = 18000 + (hash(route.id) % 20000);
+export function mockQuotes(route, departDate, currency, now) {
+  const days = Math.max(0, (Date.parse(departDate) - now.getTime()) / 86_400_000);
+  const seed = hash(`${route.id}:${departDate}:${now.toISOString().slice(0, 13)}`);
+  const base = 12000 + (hash(route.id) % 20000) + (hash(departDate) % 3000);
   // 出発が近づくほど上がり、60日前前後が底になる、という緩いカーブ + ノイズ
   const curve = 1 + Math.max(0, 30 - days) * 0.025 + Math.max(0, days - 60) * 0.002;
   return ['JAL', 'ANA', 'Peach', 'Skymark'].map((airline, i) => ({

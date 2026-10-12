@@ -5,6 +5,12 @@ const PALETTE = ['#3a62c4', '#c4572e', '#2e9e6a', '#8a4fc4', '#c49a2e'];
 let currency = 'JPY';
 const yen = (v) => (v == null ? '-' : new Intl.NumberFormat('ja-JP', { style: 'currency', currency }).format(v));
 const fmtDate = (ms) => new Date(ms).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });
+const fmtDepart = (d) => {
+  const [, m, day] = d.split('-').map(Number);
+  const w = '日月火水木金土'[new Date(`${d}T00:00:00Z`).getUTCDay()];
+  return `${m}/${day}(${w})`;
+};
+const airports = (v) => (Array.isArray(v) ? v.join('・') : v);
 
 async function getJson(path) {
   const res = await fetch(path, { cache: 'no-cache' });
@@ -36,9 +42,12 @@ function renderCard(route, store) {
   const node = document.getElementById('route-card').content.cloneNode(true);
   const $ = (sel) => node.querySelector(sel);
   $('.label').textContent = route.label;
+  const range = route.departDateFrom === route.departDateTo
+    ? fmtDepart(route.departDateFrom)
+    : `${fmtDepart(route.departDateFrom)}〜${fmtDepart(route.departDateTo)}`;
   $('.dates').textContent =
-    `${route.origin} → ${route.destination} / ${route.departDate}` +
-    (route.returnDate ? ` 〜 ${route.returnDate}` : ' 片道') +
+    `${airports(route.origin)} → ${airports(route.destination)} / ${range}` +
+    (route.returnDate ? ` 復路 ${fmtDepart(route.returnDate)}` : ' 片道') +
     (route.daysToDeparture >= 0 ? `（出発まで ${route.daysToDeparture} 日）` : '');
 
   const rec = route.recommendation;
@@ -48,6 +57,7 @@ function renderCard(route, store) {
 
   const stats = [
     ['現在の最安値', yen(route.latest?.price)],
+    ['最安の出発日', route.latest?.departDate ? fmtDepart(route.latest.departDate) : '-'],
     ['観測最安値', yen(route.allTimeLow)],
     ['観測最高値', yen(route.allTimeHigh)],
     ['相場レンジ', route.typicalRange ? `${yen(route.typicalRange[0])}〜${yen(route.typicalRange[1])}` : '-'],
@@ -62,8 +72,19 @@ function renderCard(route, store) {
     $('.stats').append(div);
   }
 
+  const cheapest = Math.min(...route.byDate.map((d) => d.price ?? Infinity));
+  for (const d of route.byDate) {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="d"></span><span class="p"></span>';
+    li.querySelector('.d').textContent = fmtDepart(d.date);
+    li.querySelector('.p').textContent = d.daysToDeparture < 0 ? '出発済み' : yen(d.price);
+    if (d.price === cheapest && d.daysToDeparture >= 0) li.classList.add('best');
+    if (d.daysToDeparture < 0) li.classList.add('past');
+    $('.by-date').append(li);
+  }
+
   const records = store?.records ?? [];
-  if (records.length || store?.insights?.serpapi?.priceHistory) {
+  if (records.length) {
     const canvas = $('canvas');
     // テンプレート複製後に DOM へ追加されてから描画する
     queueMicrotask(() => drawChart(canvas, route, store));
@@ -73,10 +94,12 @@ function renderCard(route, store) {
 
   const lastTs = records.at(-1)?.ts;
   const tbody = $('.quotes tbody');
-  for (const r of records.filter((r) => r.ts === lastTs)) {
+  const latestRecords = records.filter((r) => r.ts === lastTs).sort((a, b) => a.minPrice - b.minPrice);
+  for (const r of latestRecords) {
     for (const q of r.quotes) {
       const tr = document.createElement('tr');
       const cells = [
+        r.departDate ? fmtDepart(r.departDate) : '-',
         PROVIDER_LABEL[r.provider] ?? r.provider,
         q.airline ?? '-',
         yen(q.price),
@@ -86,7 +109,7 @@ function renderCard(route, store) {
       cells.forEach((c, i) => {
         const td = document.createElement('td');
         td.textContent = c;
-        if (i === 2) td.className = 'num';
+        if (i === 3) td.className = 'num';
         tr.append(td);
       });
       tbody.append(tr);
@@ -101,14 +124,19 @@ function drawChart(canvas, route, store) {
   const grid = css.getPropertyValue('--border').trim();
   const datasets = [];
 
-  const byProvider = new Map();
+  // 出発日ごとに、各収集時点での全プロバイダ中の最安値を線にする
+  const byDate = new Map();
   for (const r of store?.records ?? []) {
-    if (!byProvider.has(r.provider)) byProvider.set(r.provider, []);
-    byProvider.get(r.provider).push({ x: Date.parse(r.ts), y: r.minPrice });
+    const key = r.departDate ?? route.departDateFrom;
+    if (!byDate.has(key)) byDate.set(key, new Map());
+    const points = byDate.get(key);
+    const x = Date.parse(r.ts);
+    points.set(x, Math.min(points.get(x) ?? Infinity, r.minPrice));
   }
-  [...byProvider].forEach(([provider, data], i) => {
+  [...byDate].sort(([a], [b]) => a.localeCompare(b)).forEach(([date, points], i) => {
+    const data = [...points].sort(([a], [b]) => a - b).map(([x, y]) => ({ x, y }));
     datasets.push({
-      label: PROVIDER_LABEL[provider] ?? provider,
+      label: `${fmtDepart(date)} 発`,
       data,
       borderColor: PALETTE[i % PALETTE.length],
       backgroundColor: PALETTE[i % PALETTE.length],
@@ -118,10 +146,11 @@ function drawChart(canvas, route, store) {
     });
   });
 
-  const history = store?.insights?.serpapi?.priceHistory;
+  const target = route.latest?.departDate;
+  const history = target ? store?.insights?.serpapi?.[target]?.priceHistory : null;
   if (history?.length) {
     datasets.push({
-      label: 'Google の価格履歴',
+      label: `Google の価格履歴（${fmtDepart(target)}）`,
       data: history.map(([t, p]) => ({ x: t * 1000, y: p })),
       borderColor: '#888',
       borderDash: [4, 4],

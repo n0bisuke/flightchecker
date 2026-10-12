@@ -3,18 +3,29 @@
 // 必要な環境変数: DUFFEL_TOKEN
 // ※ duffel_test_ トークンでは架空の「Duffel Airways」等が返るため、実価格の参考にはならない。
 
+import { codes } from '../lib/util.mjs';
+
 export const name = 'duffel';
 
 export function isEnabled(env) {
   return Boolean(env.DUFFEL_TOKEN);
 }
 
-export async function fetchQuotes(route, { env, currency, fetchImpl = fetch }) {
-  const slices = [
-    { origin: route.origin, destination: route.destination, departure_date: route.departDate },
-  ];
+export async function fetchQuotes(route, ctx) {
+  // 複数空港の場合は出発・到着空港の組み合わせごとに検索する
+  const quotes = [];
+  for (const origin of codes(route.origin)) {
+    for (const destination of codes(route.destination)) {
+      quotes.push(...(await searchOffers(route, origin, destination, ctx)).quotes);
+    }
+  }
+  return { quotes, insights: null };
+}
+
+async function searchOffers(route, origin, destination, { departDate, env, currency, fetchImpl = fetch }) {
+  const slices = [{ origin, destination, departure_date: departDate }];
   if (route.returnDate) {
-    slices.push({ origin: route.destination, destination: route.origin, departure_date: route.returnDate });
+    slices.push({ origin: destination, destination: origin, departure_date: route.returnDate });
   }
   const passengers = Array.from({ length: route.adults ?? 1 }, () => ({ type: 'adult' }));
 

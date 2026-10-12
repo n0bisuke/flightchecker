@@ -1,7 +1,7 @@
 // config/routes.json の各路線について、有効なプロバイダから運賃を取得し data/prices/ に追記する。
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { readJson, writeJson, daysUntil } from './lib/util.mjs';
+import { readJson, writeJson, daysUntil, routeDates } from './lib/util.mjs';
 import { selectProviders } from './providers/index.mjs';
 import { runAnalysis } from './analyze.mjs';
 
@@ -25,37 +25,45 @@ export async function collect({ env = process.env, now = new Date(), dataDir = j
 
   try {
     for (const route of config.routes) {
-      if (daysUntil(route.departDate, now) < 0) {
+      const dates = routeDates(route).filter((d) => daysUntil(d, now) >= 0);
+      if (dates.length === 0) {
         console.log(`skip ${route.id}: 出発日を過ぎています`);
         continue;
       }
       const file = join(dataDir, 'prices', `${route.id}.json`);
       const store = await readJson(file, { routeId: route.id, records: [], insights: {} });
 
-      for (const provider of providers) {
-        try {
-          const { quotes, insights } = await provider.fetchQuotes(route, { env, currency, browser, now });
-          const sorted = quotes.filter((q) => q.currency === currency).sort((a, b) => a.price - b.price);
-          if (sorted.length === 0) throw new Error('運賃が取得できませんでした');
+      for (const departDate of dates) {
+        for (const provider of providers) {
+          const label = `${route.id} ${departDate} [${provider.name}]`;
+          try {
+            const { quotes, insights } = await provider.fetchQuotes(route, { departDate, env, currency, browser, now });
+            const sorted = quotes.filter((q) => q.currency === currency).sort((a, b) => a.price - b.price);
+            if (sorted.length === 0) throw new Error('運賃が取得できませんでした');
 
-          store.records.push({
-            ts: now.toISOString(),
-            provider: provider.name,
-            currency,
-            minPrice: sorted[0].price,
-            quoteCount: sorted.length,
-            quotes: sorted.slice(0, TOP_N),
-            ...(insights?.typicalRange ? { typicalRange: insights.typicalRange } : {}),
-            ...(insights?.priceLevel ? { priceLevel: insights.priceLevel } : {}),
-          });
-          // 価格履歴などサイズの大きい情報は最新分だけ保持する
-          if (insights) store.insights[provider.name] = { ts: now.toISOString(), ...insights };
+            store.records.push({
+              ts: now.toISOString(),
+              departDate,
+              provider: provider.name,
+              currency,
+              minPrice: sorted[0].price,
+              quoteCount: sorted.length,
+              quotes: sorted.slice(0, TOP_N),
+              ...(insights?.typicalRange ? { typicalRange: insights.typicalRange } : {}),
+              ...(insights?.priceLevel ? { priceLevel: insights.priceLevel } : {}),
+            });
+            // 価格履歴などサイズの大きい情報は出発日ごとに最新分だけ保持する
+            if (insights) {
+              store.insights[provider.name] ??= {};
+              store.insights[provider.name][departDate] = { ts: now.toISOString(), ...insights };
+            }
 
-          console.log(`ok   ${route.id} [${provider.name}] min ${sorted[0].price} ${currency} (${sorted.length} quotes)`);
-          status.results.push({ routeId: route.id, provider: provider.name, ok: true, minPrice: sorted[0].price });
-        } catch (err) {
-          console.error(`fail ${route.id} [${provider.name}] ${err.message}`);
-          status.results.push({ routeId: route.id, provider: provider.name, ok: false, error: err.message });
+            console.log(`ok   ${label} min ${sorted[0].price} ${currency} (${sorted.length} quotes)`);
+            status.results.push({ routeId: route.id, departDate, provider: provider.name, ok: true, minPrice: sorted[0].price });
+          } catch (err) {
+            console.error(`fail ${label} ${err.message}`);
+            status.results.push({ routeId: route.id, departDate, provider: provider.name, ok: false, error: err.message });
+          }
         }
       }
       await writeJson(file, store);

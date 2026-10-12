@@ -31,20 +31,25 @@ GitHub Actions (cron 12時間ごと)
 
 ## 監視する路線の設定
 
-`config/routes.json` を編集します。`returnDate` を省略すると片道になります。
+`config/routes.json` を編集します。出発日は `departDateFrom`〜`departDateTo` の範囲で指定でき、範囲内の各日を検索して最安の日を表示します（1日だけなら同じ日付を入れます）。`returnDate` を省略すると片道です。
 
 ```json
 {
-  "id": "HND-OKA-20261220",
-  "label": "羽田 → 那覇（12/20 片道）",
-  "origin": "HND",
-  "destination": "OKA",
-  "departDate": "2026-12-20",
+  "id": "TYO-CTS-1101-1105",
+  "label": "東京 → 新千歳（11/1〜11/5）",
+  "origin": ["HND", "NRT"],
+  "originName": "Tokyo",
+  "destination": ["CTS"],
+  "destinationName": "New Chitose",
+  "departDateFrom": "2026-11-01",
+  "departDateTo": "2026-11-05",
   "adults": 1
 }
 ```
 
-出発日を過ぎた路線は収集をスキップします。
+- `origin` / `destination` は複数空港を配列で指定できます（SerpApi はまとめて1回、Duffel は組み合わせごとに検索）。
+- `originName` / `destinationName` はスクレイピング時の検索語に使います（英語の都市名）。
+- 1回の実行での API 呼び出し数は「全路線の候補日数の合計」です。出発日を過ぎた候補日は収集をスキップします。
 
 ## 買い時の目安
 
@@ -64,7 +69,7 @@ GitHub Actions (cron 12時間ごと)
 2. **Settings → Secrets and variables → Actions** で使うプロバイダの Secret / Variable を登録する
 3. **Actions → Collect prices & deploy → Run workflow** で初回実行する
 
-API の無料枠に合わせて `.github/workflows/collect.yml` の cron 間隔を調整してください（呼び出し回数 = 路線数 × 実行回数）。
+API の無料枠に合わせて `.github/workflows/collect.yml` の cron 間隔を調整してください（呼び出し回数 = 候補日数の合計 × 実行回数）。
 
 ## ローカルでの確認
 
