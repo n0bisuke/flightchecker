@@ -1,0 +1,22 @@
+{
+  "currency": "JPY",
+  "routes": [
+    {
+      "id": "HND-OKA-20261220",
+      "label": "羽田 → 那覇（12/20 片道）",
+      "origin": "HND",
+      "destination": "OKA",
+      "departDate": "2026-12-20",
+      "adults": 1
+    },
+    {
+      "id": "NRT-TPE-20270205-20270209",
+      "label": "成田 ⇄ 台北（2/5〜2/9 往復）",
+      "origin": "NRT",
+      "destination": "TPE",
+      "departDate": "2027-02-05",
+      "returnDate": "2027-02-09",
+      "adults": 1
+    }
+  ]
+}
