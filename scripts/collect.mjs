@@ -13,7 +13,10 @@ export async function collect({ env = process.env, now = new Date(), dataDir = j
   const currency = config.currency ?? 'JPY';
   const providers = selectProviders(env);
   if (providers.length === 0) {
-    throw new Error('有効なプロバイダがありません。SERPAPI_KEY / DUFFEL_TOKEN / ENABLE_SCRAPER=1 / PROVIDERS=mock のいずれかを設定してください。');
+    // 未設定でもサイトのデプロイまでは進められるよう、失敗にはしない
+    console.warn('::warning::有効なプロバイダがありません。SERPAPI_KEY / DUFFEL_TOKEN / ENABLE_SCRAPER=1 / PROVIDERS=mock のいずれかを設定してください。');
+    await runAnalysis({ dataDir, now });
+    return { ts: now.toISOString(), results: [] };
   }
   console.log(`providers: ${providers.map((p) => p.name).join(', ')}`);
 
