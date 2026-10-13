@@ -1,12 +1,12 @@
 # Flight Checker
 
-航空券の価格を GitHub Actions で定期的に収集し、価格推移のグラフと「買い時の目安」を GitHub Pages で表示するサイトです。サーバーや DB は使わず、収集したデータは `data/` 配下の JSON としてリポジトリにコミットされます。
+航空券と宿の価格を GitHub Actions で定期的に収集し、価格推移のグラフと「買い時の目安」を GitHub Pages で表示するサイトです。サーバーや DB は使わず、収集したデータは `data/` 配下の JSON としてリポジトリにコミットされます。
 
 ## 仕組み
 
 ```
 GitHub Actions (cron 12時間ごと)
-  └ scripts/collect.mjs   … 各プロバイダから運賃を取得し data/prices/<路線ID>.json に追記
+  └ scripts/collect.mjs   … 各プロバイダから運賃・宿泊料金を取得し data/prices/ と data/stays/ に追記
   └ scripts/analyze.mjs   … 履歴から統計と買い時判定を計算し data/summary.json を生成
   └ data/ をコミット
   └ scripts/build-site.mjs → GitHub Pages へデプロイ（site/ + data/）
@@ -29,6 +29,17 @@ GitHub Actions (cron 12時間ごと)
 
 新しい取得元は `scripts/providers/` に `name` / `isEnabled(env)` / `fetchQuotes(route, ctx)` を持つモジュールを追加し、`scripts/providers/index.mjs` に登録すれば併用できます。
 
+## 宿の価格の取得元
+
+| 名前 | 内容 | 有効化 |
+| --- | --- | --- |
+| `serpapi` | SerpApi 経由の Google Hotels（安い順） | Secret `SERPAPI_KEY` |
+| `rakuten` | 楽天トラベル空室検索 API（指定地点の半径内で空室のある宿） | Secret `RAKUTEN_APP_ID` と `RAKUTEN_ACCESS_KEY` |
+| `mock` | 動作確認用のダミー料金 | Variable `PROVIDERS=mock` |
+
+- 楽天ウェブサービスは 2026年5月に新 API（`openapi.rakuten.co.jp`）へ移行しており、アプリID に加えてアクセスキーが必要です。アプリ登録時に許可サイトの指定（Referer チェック）がある場合は、Variable `RAKUTEN_REFERER` にそのサイトの URL（例: `https://n0bisuke.github.io/flightchecker/`）を入れてください。
+- 価格は宿泊合計（全泊分）で比較し、各回の「最安」と「中央値」を記録します。座標が分かる宿は指定半径の外を除外します。
+
 ## 監視する路線の設定
 
 `config/routes.json` を編集します。出発日は `departDateFrom`〜`departDateTo` の範囲で指定でき、範囲内の各日を検索して最安の日を表示します（1日だけなら同じ日付を入れます）。`returnDate` を省略すると片道です。
@@ -50,6 +61,26 @@ GitHub Actions (cron 12時間ごと)
 - `origin` / `destination` は複数空港を配列で指定できます（SerpApi はまとめて1回、Duffel は組み合わせごとに検索）。
 - `originName` / `destinationName` はスクレイピング時の検索語に使います（英語の都市名）。
 - 1回の実行での API 呼び出し数は「全路線の候補日数の合計」です。出発日を過ぎた候補日は収集をスキップします。
+
+## 監視する宿泊条件の設定
+
+`config/stays.json` を編集します。
+
+```json
+{
+  "id": "MORIOKA-ST-20270809-2N",
+  "label": "盛岡駅周辺（8/9〜8/11 2泊3日）",
+  "query": "盛岡駅 ホテル",
+  "latitude": 39.7016,
+  "longitude": 141.1366,
+  "radiusKm": 1.5,
+  "checkIn": "2027-08-09",
+  "checkOut": "2027-08-11",
+  "adults": 1
+}
+```
+
+- `query` は Google Hotels の検索語、`latitude` / `longitude` / `radiusKm` は楽天の検索範囲と距離での絞り込みに使います（楽天の半径は最大 3km）。
 
 ## 買い時の目安
 

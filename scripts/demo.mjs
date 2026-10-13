@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { rm } from 'node:fs/promises';
 import { readJson, writeJson, routeDates } from './lib/util.mjs';
 import { mockQuotes } from './providers/mock.mjs';
+import { mockStayQuotes } from './hotel-providers/mock.mjs';
 import { runAnalysis } from './analyze.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -24,6 +25,21 @@ for (const route of config.routes) {
     }
   }
   await writeJson(join(dataDir, 'prices', `${route.id}.json`), { routeId: route.id, records, insights: {} });
+}
+const stayConfig = await readJson(join(ROOT, 'config/stays.json'), { stays: [] });
+for (const stay of stayConfig.stays) {
+  const records = [];
+  for (let h = 45 * 24; h >= 0; h -= 6) {
+    const at = new Date(now.getTime() - h * 3_600_000);
+    const quotes = mockStayQuotes(stay, currency, at).sort((a, b) => a.total - b.total);
+    const totals = quotes.map((q) => q.total);
+    records.push({
+      ts: at.toISOString(), provider: 'mock', currency, minPrice: totals[0],
+      medianPrice: totals[Math.floor((totals.length - 1) / 2)], quoteCount: quotes.length,
+      quotes: quotes.map(({ latitude, longitude, ...q }) => ({ ...q, distanceKm: 0.3 })),
+    });
+  }
+  await writeJson(join(dataDir, 'stays', `${stay.id}.json`), { stayId: stay.id, records });
 }
 await writeJson(join(dataDir, 'status.json'), { ts: now.toISOString(), results: [] });
 await runAnalysis({ dataDir, now });

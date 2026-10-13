@@ -1,0 +1,16 @@
+{
+  "currency": "JPY",
+  "stays": [
+    {
+      "id": "MORIOKA-ST-20270809-2N",
+      "label": "盛岡駅周辺（8/9〜8/11 2泊3日）",
+      "query": "盛岡駅 ホテル",
+      "latitude": 39.7016,
+      "longitude": 141.1366,
+      "radiusKm": 1.5,
+      "checkIn": "2027-08-09",
+      "checkOut": "2027-08-11",
+      "adults": 1
+    }
+  ]
+}

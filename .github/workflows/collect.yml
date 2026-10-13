@@ -47,6 +47,9 @@ jobs:
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           DUFFEL_TOKEN: ${{ secrets.DUFFEL_TOKEN }}
+          RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
+          RAKUTEN_REFERER: ${{ vars.RAKUTEN_REFERER }}
           ENABLE_SCRAPER: ${{ vars.ENABLE_SCRAPER }}
           PROVIDERS: ${{ vars.PROVIDERS }}
         run: npm run collect

@@ -13,7 +13,12 @@
     <h1>Flight Checker</h1>
     <p class="meta" id="updated">読み込み中…</p>
   </header>
-  <main id="routes"></main>
+  <main>
+    <h2 class="section-title">航空券</h2>
+    <div id="routes" class="list"></div>
+    <h2 class="section-title">宿</h2>
+    <div id="stays" class="list"></div>
+  </main>
   <footer>
     <p>「買い時の目安」は過去の観測値と出発までの日数から機械的に判定したものです。将来の価格を保証するものではありません。</p>
   </footer>
@@ -34,6 +39,27 @@
         <summary>最新の運賃一覧（全候補日）</summary>
         <table class="quotes">
           <thead><tr><th>出発日</th><th>取得元</th><th>航空会社</th><th>価格</th><th>経由</th><th>所要</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </details>
+    </section>
+  </template>
+  <template id="stay-card">
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2 class="label"></h2>
+          <p class="meta dates"></p>
+        </div>
+        <span class="badge"></span>
+      </div>
+      <p class="reason"></p>
+      <dl class="stats"></dl>
+      <div class="chart-wrap"><canvas></canvas></div>
+      <details open>
+        <summary>最新の安い宿（宿泊合計の安い順）</summary>
+        <table class="quotes">
+          <thead><tr><th>宿</th><th>宿泊合計</th><th>1泊あたり</th><th>評価</th><th>駅から</th><th>取得元</th></tr></thead>
           <tbody></tbody>
         </table>
       </details>

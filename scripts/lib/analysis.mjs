@@ -1,7 +1,7 @@
 // 価格履歴から統計値と「買い時」の目安を計算する。
 // 機械学習ではなくシンプルな経験則によるヒューリスティック。
 
-import { daysUntil, routeDates } from './util.mjs';
+import { daysUntil, routeDates, nightsBetween } from './util.mjs';
 
 const DAY = 86_400_000;
 
@@ -109,12 +109,15 @@ export function latestByDate(records, dates, now = new Date()) {
   });
 }
 
-export function recommend({ days, latest, pct, slope, typicalRange }) {
-  if (days < 0) return { action: 'ENDED', reason: '出発日を過ぎました' };
+export function recommend({ days, latest, pct, slope, typicalRange, kind = 'flight' }) {
+  if (days < 0) return { action: 'ENDED', reason: kind === 'stay' ? 'チェックイン日を過ぎました' : '出発日を過ぎました' };
   if (!latest) return { action: 'NO_DATA', reason: 'まだ価格データがありません' };
 
   const [low, high] = typicalRange ?? [null, null];
-  if (days <= 14) return { action: 'BUY', reason: '出発まで2週間を切ると値上がりしやすい時期です' };
+  if (days <= 14) {
+    const reason = kind === 'stay' ? 'チェックインまで2週間を切り、空室が減りやすい時期です' : '出発まで2週間を切ると値上がりしやすい時期です';
+    return { action: 'BUY', reason };
+  }
   if (low !== null && latest.price <= low) return { action: 'BUY', reason: '相場レンジの下限以下です' };
   if (pct !== null && pct <= 0.15) return { action: 'BUY', reason: 'これまでの観測の中でかなり安い水準です' };
   if (days > 30 && slope !== null && slope < -50) {
@@ -124,7 +127,42 @@ export function recommend({ days, latest, pct, slope, typicalRange }) {
     return { action: 'WAIT', reason: '相場レンジの上限以上で割高です' };
   }
   if (days <= 30 && slope !== null && slope > 0) {
-    return { action: 'BUY', reason: '出発1か月以内で上昇傾向です' };
+    return { action: 'BUY', reason: `${kind === 'stay' ? 'チェックイン' : '出発'}1か月以内で上昇傾向です` };
   }
   return { action: 'WATCH', reason: '相場並みです。引き続き様子見' };
+}
+
+/** 宿泊条件ごとの統計と買い時判定。価格は宿泊合計（全泊分）で扱う。 */
+export function analyzeStay(stay, store, now = new Date()) {
+  const records = store?.records ?? [];
+  const series = cheapestSeries(records);
+  const prices = series.map((p) => p.price);
+  const latest = series.at(-1) ?? null;
+  const days = daysUntil(stay.checkIn, now);
+  const slope = slopePerDay(series.filter((p) => now.getTime() - Date.parse(p.ts) <= 7 * DAY));
+  const typicalRange = prices.length >= 5 ? [quantile(prices, 0.25), quantile(prices, 0.75)] : null;
+  const pct = latest && prices.length >= 5 ? percentileRank(prices, latest.price) : null;
+  const latestRecords = records.filter((r) => r.ts === latest?.ts);
+
+  return {
+    id: stay.id,
+    label: stay.label ?? stay.id,
+    query: stay.query,
+    checkIn: stay.checkIn,
+    checkOut: stay.checkOut,
+    nights: nightsBetween(stay.checkIn, stay.checkOut),
+    adults: stay.adults ?? 1,
+    radiusKm: stay.radiusKm ?? 1,
+    daysToCheckIn: days,
+    latest,
+    latestMedian: latestRecords.length ? Math.min(...latestRecords.map((r) => r.medianPrice ?? r.minPrice)) : null,
+    latestHotelCount: latestRecords.reduce((n, r) => n + (r.quoteCount ?? 0), 0),
+    allTimeLow: prices.length ? Math.min(...prices) : null,
+    allTimeHigh: prices.length ? Math.max(...prices) : null,
+    samples: series.length,
+    percentile: pct,
+    slopePerDay: slope === null ? null : Math.round(slope),
+    typicalRange,
+    recommendation: recommend({ days, latest, pct, slope, typicalRange, kind: 'stay' }),
+  };
 }
