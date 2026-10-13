@@ -1,0 +1,297 @@
+{
+  "generatedAt": "2026-10-13T06:49:32.132Z",
+  "currency": "JPY",
+  "routes": [
+    {
+      "id": "OKA-TYO-1015-1018",
+      "label": "那覇 → 東京（10/15〜10/18）",
+      "origin": [
+        "OKA"
+      ],
+      "destination": [
+        "HND",
+        "NRT"
+      ],
+      "departDateFrom": "2026-10-15",
+      "departDateTo": "2026-10-18",
+      "returnDate": null,
+      "daysToDeparture": 2,
+      "byDate": [
+        {
+          "date": "2026-10-15",
+          "daysToDeparture": 2,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-10-16",
+          "daysToDeparture": 3,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-10-17",
+          "daysToDeparture": 4,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-10-18",
+          "daysToDeparture": 5,
+          "price": null,
+          "provider": null,
+          "ts": null
+        }
+      ],
+      "latest": null,
+      "allTimeLow": null,
+      "allTimeHigh": null,
+      "samples": 0,
+      "percentile": null,
+      "slopePerDay": null,
+      "typicalRange": null,
+      "priceLevel": null,
+      "recommendation": {
+        "action": "NO_DATA",
+        "reason": "まだ価格データがありません"
+      }
+    },
+    {
+      "id": "TYO-CTS-1101-1105",
+      "label": "東京 → 新千歳（11/1〜11/5）",
+      "origin": [
+        "HND",
+        "NRT"
+      ],
+      "destination": [
+        "CTS"
+      ],
+      "departDateFrom": "2026-11-01",
+      "departDateTo": "2026-11-05",
+      "returnDate": null,
+      "daysToDeparture": 19,
+      "byDate": [
+        {
+          "date": "2026-11-01",
+          "daysToDeparture": 19,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-11-02",
+          "daysToDeparture": 20,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-11-03",
+          "daysToDeparture": 21,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-11-04",
+          "daysToDeparture": 22,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-11-05",
+          "daysToDeparture": 23,
+          "price": null,
+          "provider": null,
+          "ts": null
+        }
+      ],
+      "latest": null,
+      "allTimeLow": null,
+      "allTimeHigh": null,
+      "samples": 0,
+      "percentile": null,
+      "slopePerDay": null,
+      "typicalRange": null,
+      "priceLevel": null,
+      "recommendation": {
+        "action": "NO_DATA",
+        "reason": "まだ価格データがありません"
+      }
+    },
+    {
+      "id": "TYO-OSA-1118-1120",
+      "label": "東京 → 大阪（11/18〜11/20）",
+      "origin": [
+        "HND",
+        "NRT"
+      ],
+      "destination": [
+        "ITM",
+        "KIX"
+      ],
+      "departDateFrom": "2026-11-18",
+      "departDateTo": "2026-11-20",
+      "returnDate": null,
+      "daysToDeparture": 36,
+      "byDate": [
+        {
+          "date": "2026-11-18",
+          "daysToDeparture": 36,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-11-19",
+          "daysToDeparture": 37,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-11-20",
+          "daysToDeparture": 38,
+          "price": null,
+          "provider": null,
+          "ts": null
+        }
+      ],
+      "latest": null,
+      "allTimeLow": null,
+      "allTimeHigh": null,
+      "samples": 0,
+      "percentile": null,
+      "slopePerDay": null,
+      "typicalRange": null,
+      "priceLevel": null,
+      "recommendation": {
+        "action": "NO_DATA",
+        "reason": "まだ価格データがありません"
+      }
+    },
+    {
+      "id": "TYO-FUK-1206",
+      "label": "東京 → 福岡（12/6）",
+      "origin": [
+        "HND",
+        "NRT"
+      ],
+      "destination": [
+        "FUK"
+      ],
+      "departDateFrom": "2026-12-06",
+      "departDateTo": "2026-12-06",
+      "returnDate": null,
+      "daysToDeparture": 54,
+      "byDate": [
+        {
+          "date": "2026-12-06",
+          "daysToDeparture": 54,
+          "price": null,
+          "provider": null,
+          "ts": null
+        }
+      ],
+      "latest": null,
+      "allTimeLow": null,
+      "allTimeHigh": null,
+      "samples": 0,
+      "percentile": null,
+      "slopePerDay": null,
+      "typicalRange": null,
+      "priceLevel": null,
+      "recommendation": {
+        "action": "NO_DATA",
+        "reason": "まだ価格データがありません"
+      }
+    },
+    {
+      "id": "TYO-HKG-1208-1211",
+      "label": "東京 → 香港（12/8〜12/11）",
+      "origin": [
+        "HND",
+        "NRT"
+      ],
+      "destination": [
+        "HKG"
+      ],
+      "departDateFrom": "2026-12-08",
+      "departDateTo": "2026-12-11",
+      "returnDate": null,
+      "daysToDeparture": 56,
+      "byDate": [
+        {
+          "date": "2026-12-08",
+          "daysToDeparture": 56,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-12-09",
+          "daysToDeparture": 57,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-12-10",
+          "daysToDeparture": 58,
+          "price": null,
+          "provider": null,
+          "ts": null
+        },
+        {
+          "date": "2026-12-11",
+          "daysToDeparture": 59,
+          "price": null,
+          "provider": null,
+          "ts": null
+        }
+      ],
+      "latest": null,
+      "allTimeLow": null,
+      "allTimeHigh": null,
+      "samples": 0,
+      "percentile": null,
+      "slopePerDay": null,
+      "typicalRange": null,
+      "priceLevel": null,
+      "recommendation": {
+        "action": "NO_DATA",
+        "reason": "まだ価格データがありません"
+      }
+    }
+  ],
+  "stays": [
+    {
+      "id": "MORIOKA-ST-20270809-2N",
+      "label": "盛岡駅周辺（8/9〜8/11 2泊3日）",
+      "query": "盛岡駅 ホテル",
+      "checkIn": "2027-08-09",
+      "checkOut": "2027-08-11",
+      "nights": 2,
+      "adults": 1,
+      "radiusKm": 1.5,
+      "daysToCheckIn": 300,
+      "latest": null,
+      "latestMedian": null,
+      "latestHotelCount": 0,
+      "allTimeLow": null,
+      "allTimeHigh": null,
+      "samples": 0,
+      "percentile": null,
+      "slopePerDay": null,
+      "typicalRange": null,
+      "recommendation": {
+        "action": "NO_DATA",
+        "reason": "まだ価格データがありません"
+      }
+    }
+  ]
+}
