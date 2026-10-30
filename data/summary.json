@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T18:29:51.970Z",
+  "generatedAt": "2026-10-30T05:52:35.474Z",
   "currency": "JPY",
   "routes": [
     {
@@ -19,28 +19,28 @@
       "byDate": [
         {
           "date": "2026-10-15",
-          "daysToDeparture": -14,
+          "daysToDeparture": -15,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-10-16",
-          "daysToDeparture": -13,
+          "daysToDeparture": -14,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-10-17",
-          "daysToDeparture": -12,
+          "daysToDeparture": -13,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-10-18",
-          "daysToDeparture": -11,
+          "daysToDeparture": -12,
           "price": null,
           "provider": null,
           "ts": null
@@ -72,39 +72,39 @@
       "departDateFrom": "2026-11-01",
       "departDateTo": "2026-11-05",
       "returnDate": null,
-      "daysToDeparture": 3,
+      "daysToDeparture": 2,
       "byDate": [
         {
           "date": "2026-11-01",
-          "daysToDeparture": 3,
+          "daysToDeparture": 2,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-11-02",
-          "daysToDeparture": 4,
+          "daysToDeparture": 3,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-11-03",
-          "daysToDeparture": 5,
+          "daysToDeparture": 4,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-11-04",
-          "daysToDeparture": 6,
+          "daysToDeparture": 5,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-11-05",
-          "daysToDeparture": 7,
+          "daysToDeparture": 6,
           "price": null,
           "provider": null,
           "ts": null
@@ -137,25 +137,25 @@
       "departDateFrom": "2026-11-18",
       "departDateTo": "2026-11-20",
       "returnDate": null,
-      "daysToDeparture": 20,
+      "daysToDeparture": 19,
       "byDate": [
         {
           "date": "2026-11-18",
-          "daysToDeparture": 20,
+          "daysToDeparture": 19,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-11-19",
-          "daysToDeparture": 21,
+          "daysToDeparture": 20,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-11-20",
-          "daysToDeparture": 22,
+          "daysToDeparture": 21,
           "price": null,
           "provider": null,
           "ts": null
@@ -187,11 +187,11 @@
       "departDateFrom": "2026-12-06",
       "departDateTo": "2026-12-06",
       "returnDate": null,
-      "daysToDeparture": 38,
+      "daysToDeparture": 37,
       "byDate": [
         {
           "date": "2026-12-06",
-          "daysToDeparture": 38,
+          "daysToDeparture": 37,
           "price": null,
           "provider": null,
           "ts": null
@@ -223,32 +223,32 @@
       "departDateFrom": "2026-12-08",
       "departDateTo": "2026-12-11",
       "returnDate": null,
-      "daysToDeparture": 40,
+      "daysToDeparture": 39,
       "byDate": [
         {
           "date": "2026-12-08",
-          "daysToDeparture": 40,
+          "daysToDeparture": 39,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-12-09",
-          "daysToDeparture": 41,
+          "daysToDeparture": 40,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-12-10",
-          "daysToDeparture": 42,
+          "daysToDeparture": 41,
           "price": null,
           "provider": null,
           "ts": null
         },
         {
           "date": "2026-12-11",
-          "daysToDeparture": 43,
+          "daysToDeparture": 42,
           "price": null,
           "provider": null,
           "ts": null
@@ -278,7 +278,7 @@
       "nights": 2,
       "adults": 1,
       "radiusKm": 1.5,
-      "daysToCheckIn": 284,
+      "daysToCheckIn": 283,
       "latest": null,
       "latestMedian": null,
       "latestHotelCount": 0,
